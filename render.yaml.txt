@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mail-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: REDIRECT_URI
+        value: https://your-app-name.onrender.com/oauth2callback
+      - key: SECRET_KEY
+        generateValue: true
