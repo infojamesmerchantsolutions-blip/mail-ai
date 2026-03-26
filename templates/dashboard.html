@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAIL·AI Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+        }
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 24px 32px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 24px;
+        }
+        .account-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .account-header {
+            background: #008060;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .account-email {
+            font-weight: 600;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        .remove-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .remove-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .account-body {
+            padding: 20px;
+        }
+        .settings-section {
+            margin-bottom: 20px;
+        }
+        .settings-section label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .settings-section textarea,
+        .settings-section select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .save-btn {
+            background: #008060;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .save-btn:hover {
+            background: #006e52;
+        }
+        .activity-log {
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+        .activity-log h4 {
+            font-size: 13px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        .activity-list {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .activity-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #666;
+        }
+        .activity-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .add-btn {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-btn:hover {
+            border-color: #008060;
+            background: #f9f9f9;
+        }
+        .add-btn .plus {
+            font-size: 48px;
+            color: #008060;
+            margin-bottom: 12px;
+        }
+        .add-btn p {
+            color: #666;
+            font-size: 14px;
+        }
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .stat {
+            flex: 1;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #008060;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MAIL·AI Assistant</h1>
+        <p>Auto-reply to Gmail with AI | 7-touch follow-up | Per-account settings</p>
+    </div>
+    <div class="container">
+        <div class="accounts-grid" id="accounts-grid">
+            {% for account in accounts %}
+            <div class="account-card" data-id="{{ account[0] }}">
+                <div class="account-header">
+                    <span class="account-email">{{ account[1] }}</span>
+                    <button class="remove-btn" onclick="removeAccount({{ account[0] }})">Remove</button>
+                </div>
+                <div class="account-body">
+                    <div class="stats" id="stats-{{ account[0] }}">
+                        <div class="stat"><div class="stat-number">-</div><div class="stat-label">Threads</div></div>
+                        <div class="stat"><div class="stat-number">-</div><div class="stat-label">Active</div></div>
+                    </div>
+                    <div class="settings-section">
+                        <label>AI Instructions</label>
+                        <textarea class="ai-instructions" rows="3" placeholder="How should the AI reply?"></textarea>
+                    </div>
+                    <div class="settings-section">
+                        <label>Context (Your business info)</label>
+                        <textarea class="context-info" rows="2" placeholder="Who you are, services..."></textarea>
+                    </div>
+                    <button class="save-btn" onclick="saveSettings({{ account[0] }})">Save Settings</button>
+                    <div class="activity-log">
+                        <h4>Recent Activity</h4>
+                        <div class="activity-list" id="activity-{{ account[0] }}">Loading...</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="add-btn" onclick="addAccount()">
+                <div class="plus">+</div>
+                <p>Connect Gmail Account</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        {% for account in accounts %}
+        loadSettings({{ account[0] }});
+        loadActivity({{ account[0] }});
+        {% endfor %}
+
+        function loadSettings(accountId) {
+            fetch(`/get_settings/${accountId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const card = document.querySelector(`.account-card[data-id="${accountId}"]`);
+                    if (card) {
+                        card.querySelector('.ai-instructions').value = data.ai_instructions || '';
+                        card.querySelector('.context-info').value = data.context_info || '';
+                    }
+                });
+        }
+
+        function saveSettings(accountId) {
+            const card = document.querySelector(`.account-card[data-id="${accountId}"]`);
+            const data = {
+                ai_instructions: card.querySelector('.ai-instructions').value,
+                context_info: card.querySelector('.context-info').value
+            };
+            fetch(`/save_settings/${accountId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => alert('Settings saved!'));
+        }
+
+        function loadActivity(accountId) {
+            fetch(`/get_activity/${accountId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById(`activity-${accountId}`);
+                    if (container && data.length) {
+                        container.innerHTML = data.map(item => `
+                            <div class="activity-item">
+                                <div><strong>${item.action}</strong> ${item.details}</div>
+                                <div class="activity-time">${new Date(item.time).toLocaleString()}</div>
+                            </div>
+                        `).join('');
+                    } else if (container) {
+                        container.innerHTML = '<div class="activity-item">No activity yet</div>';
+                    }
+                });
+        }
+
+        function addAccount() {
+            window.location.href = '/add_account';
+        }
+
+        function removeAccount(accountId) {
+            if (confirm('Remove this Gmail account?')) {
+                window.location.href = `/remove_account/${accountId}`;
+            }
+        }
+
+        setInterval(() => {
+            {% for account in accounts %}
+            loadActivity({{ account[0] }});
+            {% endfor %}
+        }, 30000);
+    </script>
+</body>
+</html>
